@@ -7,13 +7,12 @@ matrix:
   fast_finish: true
 
 install:
-  - choco install googlechrome
   - ps: Install-Product node $env:nodejs_version
   - node --version
   - npm --version
   - npm install
 
 test_script:
-  - npm run citest-jasmine
+  - npm run citest-jasmine -- ie
 
 build: off
