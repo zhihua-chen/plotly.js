@@ -1,4 +1,28 @@
+/*eslint-env node*/
+
 // Karma configuration
+
+/*
+ * The browser on which the tests are run can be specified with an argument.
+ *
+ * Example:
+ *
+ *  $ npm run citest-jasmine -- ie
+ *
+ * will only run the tests on Internet Explorer.
+ *
+ */
+
+var lowerCase2BrowserName = {
+    firefox: 'Firefox',
+    chrome: 'Chrome',
+    ie: 'IE'
+};
+
+var arg = process.argv[4] || 'firefox';
+var browser = lowerCase2BrowserName[arg.toLowerCase()];
+
+func.defaultConfig = require('./karma.conf').defaultConfig;
 
 function func(config) {
 
@@ -12,6 +36,15 @@ function func(config) {
     func.defaultConfig.logLevel = config.LOG_INFO;
 
     // Continuous Integration mode
+
+    func.defaultConfig.files = [
+        'assets/jquery-1.8.3.min.js',
+        'tests/*_test.js'
+    ];
+
+    func.defaultConfig.preprocessors = {
+        'tests/*_test.js': ['browserify']
+    };
 
     /*
      * WebGL interaction test cases fail on the CircleCI
@@ -28,10 +61,9 @@ function func(config) {
 
     func.defaultConfig.autoWatch = false;
 
-    func.defaultConfig.browsers = ['Firefox'];
+    func.defaultConfig.browsers = [browser];
 
     config.set(func.defaultConfig);
 }
 
-func.defaultConfig = require('./karma.conf').defaultConfig;
 module.exports = func;
