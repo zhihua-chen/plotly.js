@@ -18,7 +18,12 @@ var testFileGlob = process.argv[4] ? process.argv[4] : 'tests/*_test.js';
 function func(config) {
 
     // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+    // possible values:
+    //  - config.LOG_DISABLE
+    //  - config.LOG_ERROR
+    //  - config.LOG_WARN
+    //  - config.LOG_INFO
+    //  - config.LOG_DEBUG
     func.defaultConfig.logLevel = config.LOG_INFO;
 
     config.set(func.defaultConfig);

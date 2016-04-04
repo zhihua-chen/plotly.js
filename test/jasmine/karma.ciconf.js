@@ -3,7 +3,12 @@
 function func(config) {
 
     // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+    // possible values:
+    //  - config.LOG_DISABLE
+    //  - config.LOG_ERROR
+    //  - config.LOG_WARN
+    //  - config.LOG_INFO
+    //  - config.LOG_DEBUG
     func.defaultConfig.logLevel = config.LOG_INFO;
 
     // Continuous Integration mode
