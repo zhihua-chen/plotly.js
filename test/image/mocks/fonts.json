@@ -21,7 +21,6 @@
     "layout":{
         "boxmode":"overlay",
         "paper_bgcolor":"#fff",
-        "height":790,
         "titlefont":{
             "color":"",
             "family":"",
@@ -37,7 +36,6 @@
         "title":"Click to enter Plot title",
         "plot_bgcolor":"#fff",
         "dragmode":"zoom",
-        "width":1530,
         "bargap":0.2,
         "xaxis":{
             "domain":[

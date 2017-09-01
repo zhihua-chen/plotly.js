@@ -32,8 +32,6 @@
         },
         "showlegend": false,
         "autosize": true,
-        "width": 1785,
-        "height": 764,
         "xaxis": {
             "title": "Click to enter X axis title",
             "titlefont": {
