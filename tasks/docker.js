@@ -2,13 +2,10 @@ var constants = require('./util/constants');
 var common = require('./util/common');
 var containerCommands = require('./util/container_commands');
 
-var isCI = process.env.CIRCLECI;
 var arg = process.argv[2];
-
 var msg, cmd, cb, errorCb;
 
 switch(arg) {
-
     case 'pull':
         msg = 'Pulling latest docker image';
         cmd = 'docker pull ' + constants.testContainerImage;
@@ -20,14 +17,10 @@ switch(arg) {
 
         // if docker-run fails, try docker-start.
         errorCb = function(err) {
-            if(err) common.execCmd('docker start ' + constants.testContainerName);
+            if(err) {
+                common.execCmd('docker start ' + constants.testContainerName);
+            }
         };
-
-        break;
-
-    case 'setup':
-        msg = 'Setting up ' + constants.testContainerName + ' docker container for testing';
-        cmd = containerCommands.getRunCmd(isCI, containerCommands.setup);
         break;
 
     case 'stop':

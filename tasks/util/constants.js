@@ -78,10 +78,8 @@ module.exports = {
     pathToCredentials: path.join(pathToBuild, 'credentials.json'),
 
     testContainerImage: 'plotly/testbed:latest',
-    testContainerName: process.env.PLOTLYJS_TEST_CONTAINER_NAME || 'imagetest',
-    testContainerPort: '9010',
-    testContainerUrl: 'http://localhost:9010/',
-    testContainerHome: '/var/www/streambed/image_server/plotly.js',
+    testContainerName: process.env.PLOTLYJS_TEST_CONTAINER_NAME || 'image-exporter-container',
+    testContainerHome: '/var/www/image-exporter/plotly.js',
 
     uglifyOptions: {
         fromString: true,

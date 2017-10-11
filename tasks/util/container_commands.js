@@ -1,74 +1,40 @@
 var constants = require('./constants');
 
-var containerCommands = {
-    cdHome: 'cd ' + constants.testContainerHome,
-    cpIndex: 'cp -f test/image/index.html ../server_app/index.html',
-    injectEnv: [
-        'sed -i',
-        's/process.env.PLOTLY_MAPBOX_DEFAULT_ACCESS_TOKEN/\\\'' + constants.mapboxAccessToken + '\\\'/',
-        '../server_app/main.js'
-    ].join(' '),
-    restart: 'supervisorctl restart nw1'
-};
-
-containerCommands.ping = [
-    'wget',
-    '--server-response --spider --tries=20 --retry-connrefused',
-    constants.testContainerUrl + 'ping'
-].join(' ');
-
-containerCommands.setup = [
-    containerCommands.cpIndex,
-    containerCommands.injectEnv,
-    containerCommands.restart,
-    'sleep 1',
-].join(' && ');
-
-containerCommands.dockerRun = [
-    'docker run -d',
+exports.dockerRun = [
+    'docker run -di',
     '--name', constants.testContainerName,
-    '-v', constants.pathToRoot + ':' + constants.testContainerHome,
-    '-p', constants.testContainerPort + ':' + constants.testContainerPort,
+    '--volume', constants.pathToRoot + ':' + constants.testContainerHome,
+    // save files as local owner
+    '--user `id --user`',
+    // override container entry point
+    '--entrypoint /bin/bash',
     constants.testContainerImage
 ].join(' ');
 
-containerCommands.getRunCmd = function(isCI, commands) {
+exports.getExecCmd = function(isCI, commands) {
     var _commands = Array.isArray(commands) ? commands.slice() : [commands];
+    var name = constants.testContainerName;
 
-    if(isCI) return getRunCI(_commands);
+    if(isCI) {
+        _commands = ['export CIRCLECI=1'].concat(_commands);
 
-    // add setup commands locally
-    _commands = [containerCommands.setup].concat(_commands);
-    return getRunLocal(_commands);
+        var id = '$(docker inspect --format \'{{.Id}}\' ' + name + ')';
+
+        return [
+            'sudo', 'lxc-attach',
+            '-n', id,
+            '-f', '/var/lib/docker/containers/' + id + '/config.lxc',
+            '-- bash -c', quoteJoin(_commands)
+        ].join(' ');
+    }
+    else {
+        return [
+            'docker exec -i', name,
+            '/bin/bash -c', quoteJoin(_commands)
+        ].join(' ');
+    }
 };
 
-function getRunLocal(commands) {
-    commands = [containerCommands.cdHome].concat(commands);
-
-    var commandsJoined = '"' + commands.join(' && ') + '"';
-
-    return [
-        'docker exec -i',
-        constants.testContainerName,
-        '/bin/bash -c',
-        commandsJoined
-    ].join(' ');
+function quoteJoin(arr) {
+    return '"' + arr.join(' && ') + '"';
 }
-
-function getRunCI(commands) {
-    commands = ['export CIRCLECI=1', containerCommands.cdHome].concat(commands);
-
-    var commandsJoined = '"' + commands.join(' && ') + '"';
-    var containerId = '$(docker inspect --format \'{{.Id}}\' ' + constants.testContainerName + ')';
-
-    return [
-        'sudo',
-        'lxc-attach',
-        '-n', containerId,
-        '-f', '/var/lib/docker/containers/' + containerId + '/config.lxc',
-        '-- bash -c',
-        commandsJoined
-    ].join(' ');
-}
-
-module.exports = containerCommands;
