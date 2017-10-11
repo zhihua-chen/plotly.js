@@ -57,6 +57,7 @@ jobs:
           name: Set timezone to Alaska time (arbitrary timezone to test date logic)
           command: |
             sudo cp /usr/share/zoneinfo/America/Anchorage /etc/localtime
+            date
       - run:
           name: Run jasmine tests
           command: ./.circleci/test.sh jasmine
