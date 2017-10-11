@@ -39,8 +39,6 @@ if(argv.help) {
         'The tests below determine whether the images are properly',
         'exported by (only) checking the file size of the generated images.',
         '',
-        'Called by `tasks/test_export.sh in `npm run test-export`.',
-        '',
         'CLI arguments:',
         '',
         '1. \'pattern\' : glob determining which mock(s) are to be tested',
@@ -49,15 +47,20 @@ if(argv.help) {
         '',
         'Run the export test on the default mock list (in batch):',
         '',
-        '   npm run test-image',
+        '   npm run test-export',
         '',
         'Run the export on the \'contour_nolines\' mock:',
         '',
-        '    npm run test-image -- contour_nolines',
+        '   npm run test-export -- contour_nolines',
         '',
         'Run the export test on all gl3d mocks (in batch):',
         '',
-        '    npm run test-image -- gl3d_*',
+        '   npm run test-export -- gl3d_*',
+        '',
+        'Run the export test on all mocks expect gl3d and pie:',
+        '',
+        '   npm run test-export -- "\!\(gl3d_*\|pie_*\)"',
+        ''
     ].join('\n'));
     process.exit(0);
 }
@@ -68,7 +71,7 @@ var input = [];
 
 _mockList.forEach(function(mockName) {
     FORMATS.forEach(function(format) {
-        mockList.push(mockName + '.' + format)
+        mockList.push(mockName + '.' + format);
         input.push({
             figure: getImagePaths(mockName).mock,
             format: format,

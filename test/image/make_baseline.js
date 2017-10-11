@@ -14,7 +14,7 @@ var argv = require('minimist')(process.argv.slice(2), {
         queue: false,
         help: false,
         debug: false,
-        'parallel-limit': 4
+        'parallel-limit': 1
     }
 });
 
@@ -22,25 +22,27 @@ if(argv.help) {
     console.log([
         'Baseline image generation script.',
         '',
-        '  Called by `tasks/baseline.sh in `npm run baseline`',
-        '',
         '  CLI arguments:',
         '',
         '  1. \'pattern\' : glob determining the baseline(s) to be generated',
         '',
-        '  Examples:',
+        'Examples:',
         '',
-        '  Generate or (re-generate) all baselines (in queue):',
+        'Generate or (re-generate) all baselines (in queue):',
         '',
-        '      npm run baseline',
+        '   npm run baseline',
         '',
-        '  Generate or (re-generate) the \'contour_nolines\' baseline:',
+        'Generate or (re-generate) the \'contour_nolines\' baseline:',
         '',
-        '      npm run baseline -- contour_nolines',
+        '   npm run baseline -- contour_nolines',
         '',
-        '  Generate or (re-generate) all gl3d baseline (in queue):',
+        'Generate or (re-generate) all gl3d baseline (in queue):',
         '',
-        '      npm run baseline -- gl3d_*',
+        '   npm run baseline -- gl3d_*',
+        '',
+        'Generate all baselines except gl3d and pie (N.B. need to escape special characters):',
+        '',
+        '   npm run baseline -- "\!\(gl3d_*\|pie_*\)"',
         ''
     ].join('\n'));
     process.exit(0);

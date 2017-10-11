@@ -50,6 +50,7 @@ module.exports = {
     pathToTopojsonDist: path.join(pathToDist, 'topojson/'),
     pathToPlotlyGeoAssetsSrc: path.join(pathToSrc, 'assets/geo_assets.js'),
     pathToPlotlyGeoAssetsDist: path.join(pathToDist, 'plotly-geo-assets.js'),
+    pathToMathJax: path.join(pathToDist, 'extras', 'mathjax', 'MathJax.js'),
 
     pathToFontSVG: path.join(pathToSrc, 'fonts/ploticon/ploticon.svg'),
     pathToFontSVGBuild: path.join(pathToBuild, 'ploticon.js'),
