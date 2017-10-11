@@ -1,18 +1,17 @@
 var imageExporter = require('image-exporter');
-var path = require('path');
 var constants = require('../../../tasks/util/constants');
 
 function run(mockList, input, argv, write) {
     argv = argv || {};
 
     if(!Array.isArray(mockList) || mockList.length === 0) {
-        throw new Error('Empty mockList list');
+        errorOut('Empty mockList list');
     }
     if(!Array.isArray(input) || input.length === 0) {
-        throw new Error('Empty input list');
+        errorOut('Empty input list');
     }
     if(mockList.length !== input.length) {
-        throw new Error('mockList and input must have same length');
+        errorOut('mockList and input must have same length');
     }
 
     var app = imageExporter.run({
@@ -25,7 +24,7 @@ function run(mockList, input, argv, write) {
             options: {
                 plotlyJS: constants.pathToPlotlyBuild,
                 mapboxAccessToken: constants.mapboxAccessToken,
-                mathjax: '',
+                mathjax: constants.pathToMathJax,
                 topojson: constants.pathToPlotlyGeoAssetsDist
             }
         }
@@ -41,7 +40,7 @@ function run(mockList, input, argv, write) {
     app.on('export-error', function(info) {
         var mockName = mockList[info.itemIndex];
 
-        var msg = 'not ok (' + info.code + '): ' + mockName + ' - ' + info.msg;
+        var msg = 'not ok ' + mockName + ' - ' + info.msg;
         if(info.error) msg += ' ' + info.error;
 
         console.warn(msg);
@@ -58,9 +57,15 @@ function run(mockList, input, argv, write) {
             console.log('\nFailed test(s):');
             console.log(failed.join('\n'));
         }
+        process.exit(info.code);
     });
 
     return app;
+}
+
+function errorOut(msg) {
+    console.error(msg);
+    process.exit(1);
 }
 
 module.exports = run;

@@ -17,7 +17,7 @@ var argv = require('minimist')(process.argv.slice(2), {
         queue: false,
         help: false,
         debug: false,
-        threshold: 1e-6,
+        threshold: 1e-3,
         'parallel-limit': 4
     }
 });
@@ -30,7 +30,7 @@ if(argv.help) {
         '',
         'CLI arguments:',
         '',
-        '1. \'pattern\' : glob determining which mock(s) are to be tested',
+        '1. \'pattern\' : glob(s) determining which mock(s) are to be tested',
         '2. --queue : if sent, the image will be run in queue instead of in batch.',
         '    Makes the test run significantly longer, but is recommended on weak hardware.',
         '',
@@ -38,15 +38,19 @@ if(argv.help) {
         '',
         'Run all tests in batch:',
         '',
-        '    npm run test-image',
+        '   npm run test-image',
         '',
         'Run the \'contour_nolines\' test:',
         '',
-        '    npm run test-image -- contour_nolines',
+        '   npm run test-image -- contour_nolines',
         '',
         'Run all gl3d image test in queue:',
         '',
-        '    npm run test-image -- gl3d_* --queue',
+        '   npm run test-image -- gl3d_* --queue',
+        '',
+        'Run all image tests except gl3d and pie (N.B. need to escape special characters):',
+        '',
+        '   npm run baseline -- "\!\(gl3d_*\|pie_*\)"',
         ''
     ].join('\n'));
     process.exit(0);
