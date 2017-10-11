@@ -117,7 +117,7 @@
     "glob": "^7.0.0",
     "glslify": "^4.0.0",
     "gzip-size": "^3.0.0",
-    "image-exporter": "file:../image-exporter",
+    "image-exporter": "git+ssh://git@github.com/plotly/image-exporter.git",
     "image-size": "^0.5.1",
     "jasmine-core": "^2.4.1",
     "jsdom": "^11.2.0",
