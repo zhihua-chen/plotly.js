@@ -78,7 +78,7 @@ module.exports = {
     mapboxAccessToken: 'pk.eyJ1IjoiZXRwaW5hcmQiLCJhIjoiY2luMHIzdHE0MGFxNXVubTRxczZ2YmUxaCJ9.hwWZful0U2CQxit4ItNsiQ',
     pathToCredentials: path.join(pathToBuild, 'credentials.json'),
 
-    testContainerImage: 'plotly/testbed:latest',
+    testContainerImage: 'plotly/testbed:image-exporter',
     testContainerName: process.env.PLOTLYJS_TEST_CONTAINER_NAME || 'image-exporter-container',
     testContainerHome: '/var/www/image-exporter/plotly.js',
 

@@ -17,22 +17,23 @@ exports.getExecCmd = function(isCI, commands) {
 
     if(isCI) {
         _commands = ['export CIRCLECI=1'].concat(_commands);
-
-        var id = '$(docker inspect --format \'{{.Id}}\' ' + name + ')';
-
-        return [
-            'sudo', 'lxc-attach',
-            '-n', id,
-            '-f', '/var/lib/docker/containers/' + id + '/config.lxc',
-            '-- bash -c', quoteJoin(_commands)
-        ].join(' ');
     }
-    else {
+
+//         var id = '$(docker inspect --format \'{{.Id}}\' ' + name + ')';
+// 
+//         return [
+//             'sudo', 'lxc-attach',
+//             '-n', id,
+//             '-f', '/var/lib/docker/containers/' + id + '/config.lxc',
+//             '-- bash -c', quoteJoin(_commands)
+//         ].join(' ');
+//     }
+//     else {
         return [
             'docker exec -i', name,
             '/bin/bash -c', quoteJoin(_commands)
         ].join(' ');
-    }
+//     }
 };
 
 function quoteJoin(arr) {

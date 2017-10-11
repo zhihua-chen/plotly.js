@@ -105,7 +105,7 @@ exports.testImageWrapper = function(opts) {
         pathToElectron = [
             'xvfb-run',
             '--server-args \'-screen 0, 1024x768x24\'',
-            constants.testContainerHome + '/../node_modules/.bin/electron'
+            '/var/www/image-exporter/node_modules/.bin/electron'
         ].join(' ');
 
         pathToScript = path.join('plotly.js', 'test', 'image', opts.script);
@@ -126,6 +126,7 @@ exports.testImageWrapper = function(opts) {
         };
     }
 
+    console.log(cmd);
     console.log(msg);
     exports.execCmd(cmd, null, errorCb);
 };

@@ -64,25 +64,23 @@ jobs:
 
   test-image:
     docker:
-      - image: circleci/node:6.10.3
-      - image: plotly/testbed:latest
+      - image: plotly/testbed:image-exporter
     working_directory: ~/repo
     steps:
       - checkout
       - attach_workspace:
           at: ~/repo
-      # https://circleci.com/docs/2.0/building-docker-images/
-      - setup_remote_docker
-      - run:
-          name: Run and setup container
-          command: |
-            npm run docker -- run
-            npm run docker -- setup
       - run:
           name: Run image tests
-          command: ./.circleci/test.sh image
+          command: |
+            xvfb-run --server-args '-screen 0, 1024x768x24' /var/www/image-exporter/node_modules/.bin/electron ./test/image/export_test.js
+            xvfb-run --server-args '-screen 0, 1024x768x24' /var/www/image-exporter/node_modules/.bin/electron ./test/image/compare_pixels_test.js
       - store_artifacts:
-          path: build
+          path: build/test_images
+          destination: test_images
+      - store_artifacts:
+          path: build/test_images_diff
+          destination: test_images_diff
 
   test-syntax:
     docker:

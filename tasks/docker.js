@@ -39,5 +39,6 @@ switch(arg) {
         break;
 }
 
+console.log(cmd);
 console.log(msg);
 common.execCmd(cmd, cb, errorCb);
