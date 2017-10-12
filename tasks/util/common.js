@@ -102,11 +102,12 @@ exports.testImageWrapper = function(opts) {
     else {
         pathToElectron = [
             'xvfb-run',
+            (isCI ? '-a' : ''),
             '--server-args \'-screen 0, 1024x768x24\'',
             constants.testContainerHome + '/../node_modules/.bin/electron'
         ].join(' ');
 
-        pathToScript = path.join('plotly.js', 'test', 'image', opts.script);
+        pathToScript = path.join(constants.testContainerHome, 'test', 'image', opts.script);
 
         cmd = wrapDockerExecCmd(
             isCI,
