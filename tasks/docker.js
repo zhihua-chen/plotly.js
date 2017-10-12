@@ -1,8 +1,8 @@
 var constants = require('./util/constants');
 var common = require('./util/common');
-var containerCommands = require('./util/container_commands');
 
 var arg = process.argv[2];
+var name = constants.testContainerName;
 var msg, cmd, cb, errorCb;
 
 switch(arg) {
@@ -12,29 +12,39 @@ switch(arg) {
         break;
 
     case 'run':
-        msg = 'Booting up ' + constants.testContainerName + ' docker container';
-        cmd = containerCommands.dockerRun;
+        msg = 'Booting up ' + name + ' docker container';
+
+        cmd = [
+            'docker run -di',
+            '--name', name,
+            '--volume', constants.pathToRoot + ':' + constants.testContainerHome,
+            // save files as local owner
+            '--user `id --user`',
+            // override container entry point
+            '--entrypoint /bin/bash',
+            constants.testContainerImage
+        ].join(' ');
 
         // if docker-run fails, try docker-start.
         errorCb = function(err) {
             if(err) {
-                common.execCmd('docker start ' + constants.testContainerName);
+                common.execCmd('docker start ' + name);
             }
         };
         break;
 
     case 'stop':
-        msg = 'Stopping ' + constants.testContainerName + ' docker container';
-        cmd = 'docker stop ' + constants.testContainerName;
+        msg = 'Stopping ' + name + ' docker container';
+        cmd = 'docker stop ' + name;
         break;
 
     case 'remove':
-        msg = 'Removing ' + constants.testContainerName + ' docker container';
-        cmd = 'docker rm ' + constants.testContainerName;
+        msg = 'Removing ' + name + ' docker container';
+        cmd = 'docker rm ' + name;
         break;
 
     default:
-        console.log('Usage: pull, run, setup, stop, remove');
+        console.log('Usage: pull, run, stop, remove');
         process.exit(0);
         break;
 }

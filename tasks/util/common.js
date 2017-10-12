@@ -1,9 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var exec = require('child_process').exec;
-
 var constants = require('./constants');
-var containerCommands = require('./container_commands');
 
 exports.execCmd = function(cmd, cb, errorCb) {
     cb = cb ? cb : function() {};
@@ -110,7 +108,7 @@ exports.testImageWrapper = function(opts) {
 
         pathToScript = path.join('plotly.js', 'test', 'image', opts.script);
 
-        cmd = containerCommands.getExecCmd(
+        cmd = wrapDockerExecCmd(
             isCI,
             [pathToElectron, pathToScript, args].join(' ')
         );
@@ -118,7 +116,7 @@ exports.testImageWrapper = function(opts) {
         errorCb = function(err) {
             if(/Xvfb failed to start/.test(err)) {
                 // in case Xvfb port was not closed, kill Xvfb and run cmd again
-                var pKill = containerCommands.getExecCmd(isCI, 'pkill Xvfb');
+                var pKill = wrapDockerExecCmd(isCI, 'pkill Xvfb');
                 exports.execCmd(pKill, function() { exports.execCmd(cmd); });
             } else if(err) {
                 process.exit(err.code);
@@ -129,3 +127,31 @@ exports.testImageWrapper = function(opts) {
     console.log(msg);
     exports.execCmd(cmd, null, errorCb);
 };
+
+function wrapDockerExecCmd(isCI, commands) {
+    var _commands = Array.isArray(commands) ? commands.slice() : [commands];
+    var name = constants.testContainerName;
+
+    if(isCI) {
+        _commands = ['export CIRCLECI=1'].concat(_commands);
+
+        var id = '$(docker inspect --format \'{{.Id}}\' ' + name + ')';
+
+        return [
+            'sudo', 'lxc-attach',
+            '-n', id,
+            '-f', '/var/lib/docker/containers/' + id + '/config.lxc',
+            '-- bash -c', quoteJoin(_commands)
+        ].join(' ');
+    }
+    else {
+        return [
+            'docker exec -i', name,
+            '/bin/bash -c', quoteJoin(_commands)
+        ].join(' ');
+    }
+}
+
+function quoteJoin(arr) {
+    return '"' + arr.join(' && ') + '"';
+}
