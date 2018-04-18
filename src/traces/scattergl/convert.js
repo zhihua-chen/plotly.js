@@ -226,15 +226,15 @@ function convertMarkerSelection(trace, target) {
 }
 
 function convertErrorBarStyle(trace, target) {
+    if(target.copy_ystyle) {
+        target = trace.error_y;
+    }
+
     var optsOut = {
         capSize: target.width * 2,
         lineWidth: target.thickness,
         color: target.color
     };
-
-    if(target.copy_ystyle) {
-        optsOut = trace.error_y;
-    }
 
     return optsOut;
 }

@@ -47,6 +47,10 @@ function calc(gd, trace) {
     var x = xa.makeCalcdata(trace, 'x');
     var y = ya.makeCalcdata(trace, 'y');
 
+    // FIXME: without that undefined x is not detected in convertErrorBarPositions
+    if(!trace.x) trace.x = x;
+    if(!trace.y) trace.y = y;
+
     // we need hi-precision for scatter2d,
     // regl-scatter2d uses NaNs for bad/missing values
     var positions = new Array(count2);
