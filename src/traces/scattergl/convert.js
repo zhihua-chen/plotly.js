@@ -23,7 +23,7 @@ var makeBubbleSizeFn = require('../scatter/make_bubble_size_func');
 var constants = require('./constants');
 var DESELECTDIM = require('../../constants/interactions').DESELECTDIM;
 
-function convertStyle(gd, trace) {
+function convertStyle(gd, trace, positions) {
     var i;
 
     var opts = {
@@ -50,6 +50,8 @@ function convertStyle(gd, trace) {
                 opts.unselected.opacity[i] = DESELECTDIM * mo[i];
             }
         }
+
+        opts.marker.positions = positions;
     }
 
     if(subTypes.hasLines(trace)) {
@@ -65,6 +67,8 @@ function convertStyle(gd, trace) {
             dashes[i] *= trace.line.width;
         }
         opts.line.dashes = dashes;
+
+        Lib.extendFlat(opts.line, convertLinePositions(gd, trace, positions));
     }
 
     if(trace.error_x && trace.error_x.visible) {
@@ -282,6 +286,8 @@ function convertLinePositions(gd, trace, positions) {
     var linePositions;
     var i;
 
+    if(!count) return;
+
     if(subTypes.hasLines(trace) && count) {
         if(trace.line.shape === 'hv') {
             linePositions = [];
@@ -362,8 +368,10 @@ function convertLinePositions(gd, trace, positions) {
 
 function convertErrorBarPositions(gd, trace, positions) {
     var calcFromTrace = Registry.getComponentMethod('errorbars', 'calcFromTrace');
-    var vals = calcFromTrace(trace, gd._fullLayout);
     var count = positions.length / 2;
+
+
+    var vals = calcFromTrace(trace, gd._fullLayout);
     var out = {};
 
     function put(axLetter) {

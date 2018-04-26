@@ -28,7 +28,6 @@ var getTraceColor = require('../scatter/get_trace_color');
 var fillHoverText = require('../scatter/fill_hover_text');
 
 var convertStyle = require('./convert').convertStyle;
-var convertLinePositions = require('./convert').convertLinePositions;
 var convertErrorBarPositions = require('./convert').convertErrorBarPositions;
 
 var BADNUM = require('../../constants/numerical').BADNUM;
@@ -47,9 +46,6 @@ function calc(gd, trace) {
     var x = xa.makeCalcdata(trace, 'x');
     var y = ya.makeCalcdata(trace, 'y');
 
-    // FIXME: without that undefined x is not detected in convertErrorBarPositions
-    if(!trace.x) trace.x = x;
-    if(!trace.y) trace.y = y;
 
     // we need hi-precision for scatter2d,
     // regl-scatter2d uses NaNs for bad/missing values
@@ -86,7 +82,26 @@ function calc(gd, trace) {
 
     // create scene options and scene
     calcColorscales(trace);
-    var opts = sceneOptions(gd, subplot, trace, positions);
+
+    // sceneOptions
+    var opts = convertStyle(gd, trace, positions);
+
+    if(opts.errorX || opts.errorY) {
+        // fake trace for error bars
+        var _trace = Lib.extendFlat({}, trace);
+        if(!_trace.x) _trace.x = x;
+        if(!_trace.y) _trace.y = y;
+
+        var errors = convertErrorBarPositions(gd, _trace, positions);
+
+        if(opts.errorX) {
+            Lib.extendFlat(opts.errorX, errors.x);
+        }
+        if(opts.errorY) {
+            Lib.extendFlat(opts.errorY, errors.y);
+        }
+    }
+
     var scene = sceneUpdate(gd, subplot);
 
     // Re-use SVG scatter axis expansion routine except
@@ -134,35 +149,6 @@ function calc(gd, trace) {
 
     gd.firstscatter = false;
     return [{x: false, y: false, t: stash, trace: trace}];
-}
-
-// create scene options
-function sceneOptions(gd, subplot, trace, positions) {
-    var opts = convertStyle(gd, trace);
-
-    if(opts.marker) {
-        opts.marker.positions = positions;
-    }
-
-    if(opts.line && positions.length > 1) {
-        Lib.extendFlat(
-            opts.line,
-            convertLinePositions(gd, trace, positions)
-        );
-    }
-
-    if(opts.errorX || opts.errorY) {
-        var errors = convertErrorBarPositions(gd, trace, positions);
-
-        if(opts.errorX) {
-            Lib.extendFlat(opts.errorX, errors.x);
-        }
-        if(opts.errorY) {
-            Lib.extendFlat(opts.errorY, errors.y);
-        }
-    }
-
-    return opts;
 }
 
 // make sure scene exists on subplot, return it
@@ -229,6 +215,7 @@ function sceneUpdate(gd, subplot) {
                     scene.line2d.draw(i);
                 }
                 if(scene.error2d && scene.errorXOptions[i]) {
+                    scene.error2d.regl._refresh();
                     scene.error2d.draw(i);
                 }
                 if(scene.error2d && scene.errorYOptions[i]) {
@@ -841,7 +828,6 @@ module.exports = {
     style: style,
     selectPoints: selectPoints,
 
-    sceneOptions: sceneOptions,
     sceneUpdate: sceneUpdate,
     calcHover: calcHover,
 

@@ -16,6 +16,7 @@ var calcColorscales = require('../scatter/colorscale_calc');
 var Axes = require('../../plots/cartesian/axes');
 var makeHoverPointText = require('../scatterpolar/hover').makeHoverPointText;
 var subTypes = require('../scatter/subtypes');
+var convertStyle = require('../scattergl/convert').convertStyle;
 
 var TOO_MANY_POINTS = require('../scattergl/constants').TOO_MANY_POINTS;
 
@@ -47,12 +48,12 @@ function calc(container, trace) {
     return [{x: false, y: false, t: stash, trace: trace}];
 }
 
-function plot(container, subplot, cdata) {
+function plot(gd, subplot, cdata) {
     var radialAxis = subplot.radialAxis;
     var angularAxis = subplot.angularAxis;
     var rRange = radialAxis.range;
 
-    var scene = ScatterGl.sceneUpdate(container, subplot);
+    var scene = ScatterGl.sceneUpdate(gd, subplot);
     scene.clear();
 
     cdata.forEach(function(cdscatter, traceIndex) {
@@ -100,7 +101,7 @@ function plot(container, subplot, cdata) {
             }
         }
 
-        var options = ScatterGl.sceneOptions(container, subplot, trace, positions);
+        var options = convertStyle(gd, trace, positions);
 
         // set flags to create scene renderers
         if(options.fill && !scene.fill2d) scene.fill2d = true;
@@ -143,7 +144,7 @@ function plot(container, subplot, cdata) {
         stash.count = count;
     });
 
-    return ScatterGl.plot(container, subplot, cdata);
+    return ScatterGl.plot(gd, subplot, cdata);
 }
 
 function hoverPoints(pointData, xval, yval, hovermode) {
