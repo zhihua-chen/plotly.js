@@ -10,7 +10,7 @@
 'use strict';
 
 var cone2mesh = require('gl-cone3d');
-var createMesh = require('gl-mesh3d');
+var createMesh = cone2mesh.createConeMesh;
 
 function Mesh3DTrace(scene, mesh, uid) {
     this.scene = scene;
@@ -77,6 +77,7 @@ proto.update = function(trace) {
             toDataCoords(layout.yaxis, trace.v, scene.dataScale[1]),
             toDataCoords(layout.zaxis, trace.w, scene.dataScale[2])
         ),
+        colormap: 'portland'
 //         meshgrid: [trace.x, trace.y, trace.z]
     });
 
@@ -92,7 +93,7 @@ proto.dispose = function() {
 
 function createMesh3DTrace(scene, data) {
     var gl = scene.glplot.gl;
-    var mesh = createMesh({gl: gl});
+    var mesh = createMesh(gl);
     var result = new Mesh3DTrace(scene, mesh, data.uid);
     mesh._trace = result;
     result.update(data);
