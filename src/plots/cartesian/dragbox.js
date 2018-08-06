@@ -144,40 +144,44 @@ function makeDragBox(gd, plotinfo, x, y, w, h, ns, ew) {
     var dragOptions = {
         element: dragger,
         gd: gd,
-        plotinfo: plotinfo,
-        prepFn: function(e, startX, startY) {
-            var dragModeNow = gd._fullLayout.dragmode;
+        plotinfo: plotinfo
+    };
 
-            recomputeAxisLists();
+    dragOptions.prepFn = function(e, startX, startY) {
+        var dragModeNow = gd._fullLayout.dragmode;
 
-            if(!allFixedRanges) {
-                if(isMainDrag) {
-                    // main dragger handles all drag modes, and changes
-                    // to pan (or to zoom if it already is pan) on shift
-                    if(e.shiftKey) {
-                        if(dragModeNow === 'pan') dragModeNow = 'zoom';
-                        else if(!isSelectOrLasso(dragModeNow)) dragModeNow = 'pan';
-                    }
-                    else if(e.ctrlKey) {
-                        dragModeNow = 'pan';
-                    }
+        recomputeAxisLists();
+
+        if(!allFixedRanges) {
+            if(isMainDrag) {
+                // main dragger handles all drag modes, and changes
+                // to pan (or to zoom if it already is pan) on shift
+                if(e.shiftKey) {
+                    if(dragModeNow === 'pan') dragModeNow = 'zoom';
+                    else if(!isSelectOrLasso(dragModeNow)) dragModeNow = 'pan';
                 }
-                // all other draggers just pan
-                else dragModeNow = 'pan';
+                else if(e.ctrlKey) {
+                    dragModeNow = 'pan';
+                }
             }
+            // all other draggers just pan
+            else dragModeNow = 'pan';
+        }
 
-            if(dragModeNow === 'lasso') dragOptions.minDrag = 1;
-            else dragOptions.minDrag = undefined;
+        if(dragModeNow === 'lasso') dragOptions.minDrag = 1;
+        else dragOptions.minDrag = undefined;
 
-            if(isSelectOrLasso(dragModeNow)) {
-                dragOptions.xaxes = xaxes;
-                dragOptions.yaxes = yaxes;
-                prepSelect(e, startX, startY, dragOptions, dragModeNow);
-            }
-            else if(allFixedRanges) {
+        if(isSelectOrLasso(dragModeNow)) {
+            dragOptions.xaxes = xaxes;
+            dragOptions.yaxes = yaxes;
+            // this attaches moveFn, clickFn, doneFn on dragOptions
+            prepSelect(e, startX, startY, dragOptions, dragModeNow);
+        } else {
+            dragOptions.clickFn = clickFn;
+
+            if(allFixedRanges) {
                 clearSelect(zoomlayer);
-            }
-            else if(dragModeNow === 'zoom') {
+            } else if(dragModeNow === 'zoom') {
                 dragOptions.moveFn = zoomMove;
                 dragOptions.doneFn = zoomDone;
 
@@ -187,58 +191,58 @@ function makeDragBox(gd, plotinfo, x, y, w, h, ns, ew) {
                 dragOptions.minDrag = 1;
 
                 zoomPrep(e, startX, startY);
-            }
-            else if(dragModeNow === 'pan') {
+            } else if(dragModeNow === 'pan') {
                 dragOptions.moveFn = plotDrag;
                 dragOptions.doneFn = dragTail;
                 clearSelect(zoomlayer);
             }
-        },
-        clickFn: function(numClicks, evt) {
-            removeZoombox(gd);
-
-            if(numClicks === 2 && !singleEnd) doubleClick();
-
-            if(isMainDrag) {
-                Fx.click(gd, evt, plotinfo.id);
-            }
-            else if(numClicks === 1 && singleEnd) {
-                var ax = ns ? ya0 : xa0,
-                    end = (ns === 's' || ew === 'w') ? 0 : 1,
-                    attrStr = ax._name + '.range[' + end + ']',
-                    initialText = getEndText(ax, end),
-                    hAlign = 'left',
-                    vAlign = 'middle';
-
-                if(ax.fixedrange) return;
-
-                if(ns) {
-                    vAlign = (ns === 'n') ? 'top' : 'bottom';
-                    if(ax.side === 'right') hAlign = 'right';
-                }
-                else if(ew === 'e') hAlign = 'right';
-
-                if(gd._context.showAxisRangeEntryBoxes) {
-                    d3.select(dragger)
-                        .call(svgTextUtils.makeEditable, {
-                            gd: gd,
-                            immediate: true,
-                            background: gd._fullLayout.paper_bgcolor,
-                            text: String(initialText),
-                            fill: ax.tickfont ? ax.tickfont.color : '#444',
-                            horizontalAlign: hAlign,
-                            verticalAlign: vAlign
-                        })
-                        .on('edit', function(text) {
-                            var v = ax.d2r(text);
-                            if(v !== undefined) {
-                                Registry.call('relayout', gd, attrStr, v);
-                            }
-                        });
-                }
-            }
         }
     };
+
+    function clickFn(numClicks, evt) {
+        removeZoombox(gd);
+
+        if(numClicks === 2 && !singleEnd) doubleClick();
+
+        if(isMainDrag) {
+            Fx.click(gd, evt, plotinfo.id);
+        }
+        else if(numClicks === 1 && singleEnd) {
+            var ax = ns ? ya0 : xa0,
+                end = (ns === 's' || ew === 'w') ? 0 : 1,
+                attrStr = ax._name + '.range[' + end + ']',
+                initialText = getEndText(ax, end),
+                hAlign = 'left',
+                vAlign = 'middle';
+
+            if(ax.fixedrange) return;
+
+            if(ns) {
+                vAlign = (ns === 'n') ? 'top' : 'bottom';
+                if(ax.side === 'right') hAlign = 'right';
+            }
+            else if(ew === 'e') hAlign = 'right';
+
+            if(gd._context.showAxisRangeEntryBoxes) {
+                d3.select(dragger)
+                    .call(svgTextUtils.makeEditable, {
+                        gd: gd,
+                        immediate: true,
+                        background: gd._fullLayout.paper_bgcolor,
+                        text: String(initialText),
+                        fill: ax.tickfont ? ax.tickfont.color : '#444',
+                        horizontalAlign: hAlign,
+                        verticalAlign: vAlign
+                    })
+                    .on('edit', function(text) {
+                        var v = ax.d2r(text);
+                        if(v !== undefined) {
+                            Registry.call('relayout', gd, attrStr, v);
+                        }
+                    });
+            }
+        }
+    }
 
     dragElement.init(dragOptions);
 
@@ -349,6 +353,38 @@ function makeDragBox(gd, plotinfo, x, y, w, h, ns, ew) {
         gd._dragged = zoomDragged;
 
         updateZoombox(zb, corners, box, path0, dimmed, lum);
+        // what event data do we emit here? In gl3d, camera location is emitted.
+        // what is needed for relayouting a cartesian plot?
+        // for plotly_relayout, the payload is always 'updates'
+        //             updates[ax._name + '.range[0]'] = ax.range[0];
+        //             updates[ax._name + '.range[1]'] = ax.range[1];
+        // For plotly_relayout, the event is emitted at the end of zoomDone. The payload is not
+        // computed until zoomAxRanges is called.
+        // Actual drawing is spread out in several functions
+        //        updateSubplots
+        //        ticksAndAnnotations
+        //        relayout() in plot_api.js
+        // zoom
+        //         zoomMove
+        //             no drawing
+        //         zoomDone
+        //             zoomAxRanges
+        //                 no drawing but modifying updates
+        //             dragtail
+        //                 updateSubplots
+        //                      drawing subplots
+        //                 relayout() in plot_api.js
+        // zoomwheel
+        //         zoomwheel
+        //             updateSubplots
+        //             ticksandannotations
+        //                 this modifies the updates
+        //             dragtail on delay
+        //                 updateSubplots
+        //                 relayout() in plot_api.js
+        //
+        computeZoomUpdates();
+        gd.emit('plotly_relayouting', updates);
         dimmed = true;
     }
 
@@ -358,7 +394,13 @@ function makeDragBox(gd, plotinfo, x, y, w, h, ns, ew) {
         if(Math.min(box.h, box.w) < MINDRAG * 2) {
             return removeZoombox(gd);
         }
+        computeZoomUpdates();
 
+        removeZoombox(gd);
+        dragTail();
+        showDoubleClickNotifier(gd);
+    }
+    function computeZoomUpdates() {
         // TODO: edit linked axes in zoomAxRanges and in dragTail
         if(zoomMode === 'xy' || zoomMode === 'x') {
             zoomAxRanges(xaxes, box.l / pw, box.r / pw, updates, links.xaxes);
@@ -366,10 +408,6 @@ function makeDragBox(gd, plotinfo, x, y, w, h, ns, ew) {
         if(zoomMode === 'xy' || zoomMode === 'y') {
             zoomAxRanges(yaxes, (ph - box.b) / ph, (ph - box.t) / ph, updates, links.yaxes);
         }
-
-        removeZoombox(gd);
-        dragTail();
-        showDoubleClickNotifier(gd);
     }
 
     // scroll zoom, on all draggers except corners
@@ -378,7 +416,6 @@ function makeDragBox(gd, plotinfo, x, y, w, h, ns, ew) {
     var redrawTimer = null;
     var REDRAWDELAY = constants.REDRAWDELAY;
     var mainplot = plotinfo.mainplot ? gd._fullLayout._plots[plotinfo.mainplot] : plotinfo;
-
     function zoomWheel(e) {
         // deactivate mousewheel scrolling on embedded graphs
         // devs can override this with layout._enablescrollzoom,
@@ -489,6 +526,8 @@ function makeDragBox(gd, plotinfo, x, y, w, h, ns, ew) {
             if(yActive) dragAxList(yaxes, dy);
             updateSubplots([xActive ? -dx : 0, yActive ? -dy : 0, pw, ph]);
             ticksAndAnnotations(yActive, xActive);
+            // updates computed in ticksAndAnnotations
+            gd.emit('plotly_relayouting', updates);
             return;
         }
 
@@ -561,6 +600,8 @@ function makeDragBox(gd, plotinfo, x, y, w, h, ns, ew) {
 
         updateSubplots([x0, y0, pw - dx, ph - dy]);
         ticksAndAnnotations(yActive, xActive);
+        // updates computed in ticksAndAnnotations
+        gd.emit('plotly_relayouting', updates);
     }
 
     // Draw ticks and annotations (and other components) when ranges change.
